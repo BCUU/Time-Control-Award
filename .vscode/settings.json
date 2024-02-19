@@ -51,5 +51,5 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "timecontrol.sln"
+    "dotnet.defaultSolution": "Time-Control-Award.sln"
 }
