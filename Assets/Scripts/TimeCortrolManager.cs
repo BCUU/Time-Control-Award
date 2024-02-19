@@ -40,16 +40,13 @@ public class TimeControlManager : MonoBehaviour
 
             if (www.result != UnityWebRequest.Result.Success)
             {
-                Debug.LogError("Veri çekme hatası: " + www.error);
+                Debug.LogError("Data extraction error: " + www.error);
             }
             else
             {
                 string jsonString = www.downloadHandler.text;
-                Veri veri = JsonUtility.FromJson<Veri>(jsonString);
-                
-                // datetime alanındaki saat ve dakika bilgisini al
-                 CurrentTime = DateTime.Parse(veri.datetime);
-                // TextMeshPro metnini güncelle
+                Data data = JsonUtility.FromJson<Data>(jsonString);
+                CurrentTime = DateTime.Parse(data.datetime);
                 textMeshPro.text =  ""+CurrentTime;
                 textMesh.text=""+LastTime;
             }
@@ -76,7 +73,7 @@ public class TimeControlManager : MonoBehaviour
 
 
     [System.Serializable]
-    public class Veri
+    public class Data
     {
         public string datetime;
     }
