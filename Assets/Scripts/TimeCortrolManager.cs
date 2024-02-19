@@ -8,22 +8,31 @@ using UnityEngine.Events;
 
 public class TimeControlManager : MonoBehaviour
 {
-   public TMP_Text textMeshPro, textMesh;
-   public float fries=0;
+    public TMP_Text textMeshPro, textMesh,friestext;
+    public float fries=0;
     private string url = "https://worldtimeapi.org/api/ip";
-   public  DateTime LastTime,CurrentTime;
+    public  DateTime LastTime,CurrentTime;
+
+    private const string LastTimeKey = "LastTime";
+    private const string FriesKey = "Fries";
     void Start()
     {
-        // İlk başta saati güncellemek için veri çekiyoruz
-        StartCoroutine(GetVeri());
+       if (PlayerPrefs.HasKey(LastTimeKey))
+        {
+            LastTime = DateTime.Parse(PlayerPrefs.GetString(LastTimeKey));
+        }
+
+        fries = PlayerPrefs.GetFloat(FriesKey, 0f);
+        friestext.text="fries :"+fries;
+        StartCoroutine(GetDatas());
     }
 
     public void chechTimeEvent()
     {
-        StartCoroutine(GetVeri());
+        StartCoroutine(GetDatas());
         checktime();
     }
-    IEnumerator GetVeri()
+    IEnumerator GetDatas()
     {
         using (UnityWebRequest www = UnityWebRequest.Get(url))
         {
@@ -50,6 +59,8 @@ public class TimeControlManager : MonoBehaviour
         if(CurrentTime>LastTime.AddHours(24)|| LastTime==DateTime.MinValue){
             LastTime=CurrentTime;
             GiveReward();
+            PlayerPrefs.SetString(LastTimeKey, LastTime.ToString());
+            PlayerPrefs.SetFloat(FriesKey, fries);
         }
         else{
             Debug.Log("lasttime: " + LastTime);
@@ -58,7 +69,7 @@ public class TimeControlManager : MonoBehaviour
     private void GiveReward()
         {
             fries += 1;
-            Debug.Log("Gived Reward"+fries);
+            friestext.text="fries :"+fries;
         }
 
 }
