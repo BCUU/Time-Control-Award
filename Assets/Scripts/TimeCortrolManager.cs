@@ -8,23 +8,22 @@ using UnityEngine.Events;
 
 public class TimeControlManager : MonoBehaviour
 {
-    public TMP_Text textMeshPro, textMesh,friestext;
+    public TMP_Text DayText, Day2Text,friestext,explanationtext;
     public float fries=0;
+    public float FriesAmount=1;
     private string url = "https://worldtimeapi.org/api/ip";
-    public  DateTime LastTime,CurrentTime;
+    public  int LastDay,CurrentDay;
 
     private const string LastTimeKey = "LastTime";
     private const string FriesKey = "Fries";
     void Start()
     {
-       if (PlayerPrefs.HasKey(LastTimeKey))
-        {
-            LastTime = DateTime.Parse(PlayerPrefs.GetString(LastTimeKey));
-        }
-
+        LastDay = PlayerPrefs.GetInt(LastTimeKey,0);
         fries = PlayerPrefs.GetFloat(FriesKey, 0f);
-        friestext.text="fries :"+fries;
+        friestext.text="Fries :"+fries;
+        Debug.Log("lasttime: " + LastDay);
         StartCoroutine(GetDatas());
+        Debug.Log("lasttime: " + LastDay);
     }
 
     public void chechTimeEvent()
@@ -46,27 +45,29 @@ public class TimeControlManager : MonoBehaviour
             {
                 string jsonString = www.downloadHandler.text;
                 Data data = JsonUtility.FromJson<Data>(jsonString);
-                CurrentTime = DateTime.Parse(data.datetime);
-                textMeshPro.text =  ""+CurrentTime;
-                textMesh.text=""+LastTime;
+                CurrentDay = data.day_of_year;
+                DayText.text = "day of year :"+CurrentDay;
+                Day2Text.text="Last Day"+LastDay;
             }
         }
     }
     public void checktime(){
-        if(CurrentTime>LastTime.AddHours(24)|| LastTime==DateTime.MinValue){
-            LastTime=CurrentTime;
+        if(CurrentDay>LastDay){
+            LastDay=CurrentDay;
             GiveReward();
-            PlayerPrefs.SetString(LastTimeKey, LastTime.ToString());
+            PlayerPrefs.SetInt(LastTimeKey, LastDay);
             PlayerPrefs.SetFloat(FriesKey, fries);
         }
         else{
-            Debug.Log("lasttime: " + LastTime);
+            explanationtext.text = "Are you sure you didn't eat fries yesterday? :)"; 
+            friestext.text="Fries :"+fries;
+            
         }
     }
     private void GiveReward()
         {
-            fries += 1;
-            friestext.text="fries :"+fries;
+            fries += FriesAmount;
+            friestext.text="More Fries :"+fries;
         }
 
 }
@@ -75,7 +76,7 @@ public class TimeControlManager : MonoBehaviour
     [System.Serializable]
     public class Data
     {
-        public string datetime;
+        public int day_of_year;
     }
 
 
