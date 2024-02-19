@@ -11,19 +11,26 @@ public class TimeControlManager : MonoBehaviour
     public TMP_Text DayText, Day2Text,friestext,explanationtext;
     public float fries=0;
     public float FriesAmount=1;
-    private string url = "https://worldtimeapi.org/api/ip";
+    private string url = "https://worldtimeapi.org/api/timezone/America/New_York";
     public  int LastDay,CurrentDay;
+    public DateTime LastTime;
 
-    private const string LastTimeKey = "LastTime";
+    private const string LastDayKey = "LastDay";
     private const string FriesKey = "Fries";
+    private const string LastTimeKey = "LastTime";
     void Start()
     {
-        LastDay = PlayerPrefs.GetInt(LastTimeKey,0);
+         if (PlayerPrefs.HasKey(LastTimeKey))
+        {
+            LastTime = DateTime.Parse(PlayerPrefs.GetString(LastTimeKey));
+        }
+        LastDay = PlayerPrefs.GetInt(LastDayKey,0);
         fries = PlayerPrefs.GetFloat(FriesKey, 0f);
+
         friestext.text="Fries :"+fries;
-        Debug.Log("lasttime: " + LastDay);
+        Debug.Log("lastDay: " + LastDay);
         StartCoroutine(GetDatas());
-        Debug.Log("lasttime: " + LastDay);
+        Debug.Log("lastDay: " + LastDay);
     }
 
     public void chechTimeEvent()
@@ -46,6 +53,8 @@ public class TimeControlManager : MonoBehaviour
                 string jsonString = www.downloadHandler.text;
                 Data data = JsonUtility.FromJson<Data>(jsonString);
                 CurrentDay = data.day_of_year;
+                LastTime=DateTime.Parse(data.datetime);
+
                 DayText.text = "day of year :"+CurrentDay;
                 Day2Text.text="Last Day"+LastDay;
             }
@@ -55,12 +64,14 @@ public class TimeControlManager : MonoBehaviour
         if(CurrentDay>LastDay){
             LastDay=CurrentDay;
             GiveReward();
-            PlayerPrefs.SetInt(LastTimeKey, LastDay);
+            PlayerPrefs.SetInt(LastDayKey, LastDay);
             PlayerPrefs.SetFloat(FriesKey, fries);
+            PlayerPrefs.SetString(LastTimeKey, LastTime.ToString());
         }
         else{
-            explanationtext.text = "Are you sure you didn't eat fries yesterday? :)"; 
+            //explanationtext.text = "Are you sure you didn't eat fries yesterday? :)"; 
             friestext.text="Fries :"+fries;
+            CalculateHoursLeft();
             
         }
     }
@@ -69,6 +80,23 @@ public class TimeControlManager : MonoBehaviour
             fries += FriesAmount;
             friestext.text="More Fries :"+fries;
         }
+    private void CalculateHoursLeft(){
+        DateTime endOfDay  = new DateTime(LastTime.Year, LastTime.Month, LastTime.Day, 23, 59, 59);
+        TimeSpan difference = endOfDay - LastTime;
+        if (difference.TotalSeconds < 0)
+        {
+            Debug.Log("The day has ended!");
+        }
+        else
+        {
+            int remainingHours = (int)difference.TotalHours;
+            int remainingMinutes = (int)difference.TotalMinutes % 60;
+            int remainingSeconds = (int)difference.TotalSeconds % 60;
+            explanationtext.text="Remaining time until the end of the day: " + remainingHours + " hours, " + remainingMinutes + " minutes, " + remainingSeconds + " seconds";
+            Debug.Log("Remaining time until the end of the day: " + remainingHours + " hours, " + remainingMinutes + " minutes, " + remainingSeconds + " seconds");
+        }
+
+    }
 
 }
 
@@ -77,6 +105,7 @@ public class TimeControlManager : MonoBehaviour
     public class Data
     {
         public int day_of_year;
+        public string datetime;
     }
 
 
