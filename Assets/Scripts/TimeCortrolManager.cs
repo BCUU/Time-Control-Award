@@ -8,12 +8,19 @@ using UnityEngine.Events;
 
 public class TimeControlManager : MonoBehaviour
 {
-    public TMP_Text DayText, Day2Text,friestext,explanationtext;
+    [Header("TMP Inputs")]
+    public TMP_Text DayText;
+    public TMP_Text Day2Text;
+    public TMP_Text friestext;
+    public TMP_Text explanationtext;
+     [Header("Float Inputs")]
     public float fries=0;
     public float FriesAmount=1;
-    private string url = "https://worldtimeapi.org/api/timezone/America/New_York";
     public  int LastDay,CurrentDay;
     public DateTime LastTime;
+    [SerializeField]
+    public int addHoursValue,addMinuteValue,addDayValue;
+    private string url = "https://worldtimeapi.org/api/timezone/America/New_York";
 
     private const string LastDayKey = "LastDay";
     private const string FriesKey = "Fries";
@@ -52,7 +59,7 @@ public class TimeControlManager : MonoBehaviour
             {
                 string jsonString = www.downloadHandler.text;
                 Data data = JsonUtility.FromJson<Data>(jsonString);
-                CurrentDay = data.day_of_year;
+                CurrentDay = data.day_of_year+addDayValue;
                 LastTime=DateTime.Parse(data.datetime);
 
                 DayText.text = "day of year :"+CurrentDay;
@@ -82,10 +89,19 @@ public class TimeControlManager : MonoBehaviour
         }
     private void CalculateHoursLeft(){
         DateTime endOfDay  = new DateTime(LastTime.Year, LastTime.Month, LastTime.Day, 23, 59, 59);
+        LastTime= LastTime.AddHours(addHoursValue);
+        LastTime= LastTime.AddMinutes(addMinuteValue);
         TimeSpan difference = endOfDay - LastTime;
         if (difference.TotalSeconds < 0)
         {
             Debug.Log("The day has ended!");
+            explanationtext.text = "The day has ended...";
+            if(addHoursValue!=0||addMinuteValue!=0)
+            {
+                addDayValue+=1;
+                addHoursValue=0;
+                addMinuteValue=0;
+            }
         }
         else
         {

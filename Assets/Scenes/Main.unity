@@ -379,6 +379,9 @@ MonoBehaviour:
   FriesAmount: 1
   LastDay: 0
   CurrentDay: 0
+  addHoursValue: 0
+  addMinuteValue: 0
+  addDayValue: 0
 --- !u!1 &255091270
 GameObject:
   m_ObjectHideFlags: 0
